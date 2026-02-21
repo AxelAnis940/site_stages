@@ -733,6 +733,250 @@ body {
     color: #22d3ee;
 }
 
+/* ============================================
+   AUTH MODAL STYLES
+   ============================================ */
+
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.auth-modal-content {
+    position: relative;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.auth-modal-close:hover {
+    color: #22d3ee;
+}
+
+.auth-form h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #22d3ee, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.auth-subtitle {
+    color: #9ca3af;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+}
+
+.auth-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: #d1d5db;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    background: rgba(15, 23, 42, 0.6);
+    color: white;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input::placeholder {
+    color: #6b7280;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #22d3ee;
+    box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.form-group select option {
+    background: #0f172a;
+    color: white;
+}
+
+.auth-toggle {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin-top: 16px;
+}
+
+.auth-toggle a {
+    color: #22d3ee;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.auth-toggle a:hover {
+    color: #0ea5e9;
+}
+
+/* Test Credentials Modal */
+.test-creds-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 900;
+    backdrop-filter: blur(4px);
+}
+
+.test-creds-content {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.test-creds-content h3 {
+    color: #22d3ee;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.test-creds-content p {
+    color: #d1d5db;
+    margin-bottom: 12px;
+    font-family: 'Courier New', monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.test-creds-content button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
+    background: linear-gradient(90deg, #22d3ee, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.test-creds-content button:hover {
+    opacity: 0.9;
+}
+
+/* User Dropdown Menu */
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+    min-width: 150px;
+    margin-top: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.user-dropdown a {
+    display: block;
+    padding: 10px 12px;
+    color: #d1d5db;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.user-dropdown a:hover {
+    background: rgba(34, 211, 238, 0.1);
+    color: #22d3ee;
+}
+
+.user-dropdown hr {
+    border: none;
+    border-top: 1px solid rgba(34, 211, 238, 0.2);
+    margin: 6px 0;
+}
+
+/* Protected Content */
+.protected-student {
+    display: none;
+}
+
+.protected-student.visible {
+    display: block;
+}
+
+.protected-recruiter {
+    display: none;
+}
+
+.protected-recruiter.visible {
+    display: block;
+}
+
+.protected-admin {
+    display: none;
+}
+
+.protected-admin.visible {
+    display: block;
+}
+
 /* Responsive Footer */
 @media (max-width: 640px) {
     .footer-bottom {

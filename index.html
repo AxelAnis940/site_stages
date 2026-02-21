@@ -26,8 +26,20 @@
 
             <!-- Desktop CTA -->
             <div class="cta-desktop">
-                <a href="#" class="btn btn-outline">Sign In</a>
-                <a href="#" class="btn btn-primary">Post Job</a>
+                <button id="signInBtnDesktop" class="btn btn-outline" onclick="openAuthModal('login')">Sign In</button>
+                <button id="logoutBtnDesktop" class="btn btn-outline" style="display: none;" onclick="logout()">Logout</button>
+                <button id="postJobBtnDesktop" class="btn btn-primary" style="display: none;" onclick="alert('Post Job - Recruiter feature')">Post Job</button>
+                <div id="userMenuDesktop" style="display: none; position: relative;">
+                    <button class="btn btn-outline" onclick="toggleUserMenu()">
+                        <span id="userNameDisplay"></span> ▼
+                    </button>
+                    <div id="userDropdown" class="user-dropdown" style="display: none;">
+                        <a href="#" onclick="alert('Profile page'); return false;">Profile</a>
+                        <a href="#" onclick="alert('Settings page'); return false;">Settings</a>
+                        <hr>
+                        <a href="#" onclick="logout(); return false;">Logout</a>
+                    </div>
+                </div>
             </div>
 
             <!-- Mobile Toggle -->
@@ -282,6 +294,92 @@
             </div>
         </div>
     </footer>
+
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="auth-modal" style="display: none;">
+        <div class="auth-modal-content">
+            <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h2>Sign In</h2>
+                <p class="auth-subtitle">Welcome back to InternHub</p>
+                
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="loginRole">Role</label>
+                        <select id="loginRole" required>
+                            <option value="">Select your role</option>
+                            <option value="student">Student</option>
+                            <option value="recruiter">Recruiter</option>
+                            <option value="admin">Admin (for demo)</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Sign In</button>
+                </form>
+                
+                <p class="auth-toggle">Don't have an account? <a href="#" onclick="switchAuthForm('signup'); return false;">Sign Up</a></p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Join InternHub today</p>
+                
+                <form onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <label for="signupName">Full Name</label>
+                        <input type="text" id="signupName" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupEmail">Email</label>
+                        <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" placeholder="••••••••" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signupRole">Role</label>
+                        <select id="signupRole" required>
+                            <option value="">Select your role</option>
+                            <option value="student">Student</option>
+                            <option value="recruiter">Recruiter</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Create Account</button>
+                </form>
+                
+                <p class="auth-toggle">Already have an account? <a href="#" onclick="switchAuthForm('login'); return false;">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Credentials Modal -->
+    <div id="testCredsModal" class="test-creds-modal" style="display: none;">
+        <div class="test-creds-content">
+            <h3>Test Credentials</h3>
+            <p><strong>Student:</strong> student@example.com / password123</p>
+            <p><strong>Recruiter:</strong> recruiter@example.com / password123</p>
+            <p><strong>Admin:</strong> admin@example.com / password123</p>
+            <button onclick="closeTestCredsModal()">Close</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
