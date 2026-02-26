@@ -133,84 +133,130 @@ document.addEventListener('click', (e) => {
 
 function handleLogin(event) {
     event.preventDefault();
-    
-    const email = document.getElementById('loginEmail').value;
+
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
     const role = document.getElementById('loginRole').value;
-    
-    // Find user in database
-    const user = users.find(u => u.email === email && u.password === password && u.role === role);
-    
-    if (user) {
-        // Login successful
-        currentUser = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            loginTime: new Date().toISOString(),
-        };
-        
-        // Save to localStorage
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Reset form
-        document.querySelector('#loginForm form').reset();
-        
-        // Update UI
-        closeAuthModal();
-        updateUIForLoggedInUser();
-        
-        console.log('Login successful:', currentUser);
-    } else {
-        alert('Invalid credentials. Please try again.\n\nTest credentials:\nstudent@example.com / password123\nrecruiter@example.com / password123\nadmin@example.com / password123');
+
+    if (!email || !password || !role) {
+        alert('Veuillez remplir tous les champs.');
+        return;
     }
+
+    // Send login data to server for validation
+    const fd = new FormData();
+    fd.append('email', email);
+    fd.append('password', password);
+    fd.append('role', role);
+
+    const targetUrl = new URL('users.php?action=login', window.location.href).toString();
+
+    fetch(targetUrl, {
+        method: 'POST',
+        body: fd,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(res => {
+        if (!res.ok) return res.text().then(t => Promise.reject(new Error('HTTP ' + res.status + ': ' + t)));
+        const ct = res.headers.get('content-type') || '';
+        if (ct.indexOf('application/json') === -1) {
+            return res.text().then(t => Promise.reject(new Error('Server error: ' + t)));
+        }
+        return res.json();
+    })
+      .then(data => {
+          console.log('Login response:', data);
+          if (data.success && data.user) {
+              // Login successful - save user to localStorage
+              currentUser = {
+                  id: data.user.id,
+                  name: data.user.name,
+                  email: data.user.email,
+                  role: data.user.role,
+                  loginTime: new Date().toISOString(),
+              };
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              document.querySelector('#loginForm form').reset();
+              closeAuthModal();
+              updateUIForLoggedInUser();
+              alert('Connexion réussie!');
+          } else {
+              alert('Erreur: ' + (data.error || 'Impossible de se connecter'));
+          }
+      }).catch(err => {
+          console.error('Login error:', err);
+          alert('Erreur réseau ou serveur lors de la connexion. Détails: ' + err.message);
+      });
 }
 
 function handleSignup(event) {
     event.preventDefault();
-    
-    const name = document.getElementById('signupName').value;
-    const email = document.getElementById('signupEmail').value;
+
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value;
-    const role = document.getElementById('signupRole').value;
-    
-    // Check if user already exists
-    if (users.some(u => u.email === email)) {
-        alert('This email is already registered.');
+    const role = document.getElementById('signupRole').value || 'student';
+
+    if (!name || !email || !password) {
+        alert('Veuillez remplir tous les champs.');
         return;
     }
-    
-    // Create new user (for demo purposes, only adds to current session)
-    const newUser = {
-        id: String(users.length + 1),
-        name: name,
-        email: email,
-        password: password,
-        role: role,
-    };
-    
-    users.push(newUser);
-    
-    // Auto-login the new user
-    currentUser = {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        loginTime: new Date().toISOString(),
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Reset form
-    document.querySelector('#signupForm form').reset();
-    
-    // Update UI
-    closeAuthModal();
-    updateUIForLoggedInUser();
-    
-    console.log('Signup successful:', currentUser);
+
+    // Send signup data to server to persist in MySQL
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('email', email);
+    fd.append('password', password);
+    fd.append('role', role);
+
+    // Use a fully-resolved URL (safer if the page is served from a subpath)
+    const targetUrl = new URL('users.php?action=create', window.location.href).toString();
+
+    fetch(targetUrl, {
+        method: 'POST',
+        body: fd,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(res => {
+        if (!res.ok) return res.text().then(t => Promise.reject(new Error('HTTP ' + res.status + ': ' + t)));
+        const ct = res.headers.get('content-type') || '';
+        if (ct.indexOf('application/json') === -1) {
+            return res.text().then(t => Promise.reject(new Error('Server error: ' + t)));
+        }
+        return res.json();
+    })
+      .then(data => {
+          console.log('Signup response:', data);
+          if (data.success) {
+              currentUser = {
+                  id: data.id || null,
+                  name: name,
+                  email: email,
+                  role: role,
+                  loginTime: new Date().toISOString(),
+              };
+              localStorage.setItem('currentUser', JSON.stringify(currentUser));
+              document.querySelector('#signupForm form').reset();
+              closeAuthModal();
+              updateUIForLoggedInUser();
+              alert('Inscription réussie. Utilisateur ajouté en base.');
+          } else {
+              alert('Erreur: ' + (data.error || 'Impossible de créer l\'utilisateur'));
+          }
+      }).catch(err => {
+          console.error('Signup fetch error:', err);
+          // Try to fetch debug endpoint to help diagnose server availability
+          const debugUrl = new URL('debug_db.php', window.location.href).toString();
+          fetch(debugUrl).then(r => r.text()).then(text => {
+              console.error('debug_db response:', text);
+              alert('Erreur réseau ou serveur lors de l\'inscription. Détails: ' + err.message + '\n\ndebug_db.php response (voir console pour plus):\n' + text.substring(0, 1000));
+          }).catch(e2 => {
+              console.error('Failed to fetch debug_db.php:', e2);
+              alert('Erreur réseau ou serveur lors de l\'inscription. Détails: ' + err.message + '\nImpossible d\'atteindre debug_db.php: ' + e2.message);
+          });
+      });
 }
 
 function logout() {
