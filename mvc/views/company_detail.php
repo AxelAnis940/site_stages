@@ -1,6 +1,11 @@
 <?php if (!defined('VIEW_INCLUDED')) { define('VIEW_INCLUDED', true); }
 // $company, $offers, $evaluations provided
-$userRole = $_SESSION['user']['role'] ?? 'public';
+$userRole = strtolower(trim((string) ($_SESSION['user']['role'] ?? 'public')));
+if ($userRole === 'recruiter') {
+    $userRole = 'pilote';
+}
+$canManageCompanies = in_array($userRole, ['pilote', 'admin'], true);
+$canEvaluateCompanies = in_array($userRole, ['pilote', 'admin'], true);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -56,7 +61,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                 <p><?php echo nl2br(htmlspecialchars($company['description'])); ?></p>
             </div>
             <div class="detail-buttons">
-                <?php if (in_array($userRole, ['pilote','admin'], true)): ?>
+                <?php if ($canManageCompanies): ?>
                     <a href="companies.php?action=edit&id=<?php echo $company['id']; ?>" class="btn btn-primary">Modifier</a>
                     <form style="display:inline" method="post" action="companies.php?action=delete" onsubmit="return confirm('Supprimer cette entreprise ?');">
                         <input type="hidden" name="id" value="<?php echo $company['id']; ?>">
@@ -87,11 +92,11 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                 <h2>Évaluations</h2>
                 <?php if (!empty($evaluations)): ?>
                     <table class="evals-table">
-                        <thead><tr><th>Étudiant</th><th>Note</th><th>Commentaire</th><th>Le</th></tr></thead>
+                        <thead><tr><th>Évaluateur</th><th>Note</th><th>Commentaire</th><th>Le</th></tr></thead>
                         <tbody>
                         <?php foreach ($evaluations as $e): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($e['student_name']); ?></td>
+                                <td><?php echo htmlspecialchars($e['evaluator_name']); ?></td>
                                 <td><?php echo htmlspecialchars($e['rating']); ?></td>
                                 <td><?php echo nl2br(htmlspecialchars($e['comment'])); ?></td>
                                 <td><?php echo htmlspecialchars($e['created_at']); ?></td>
@@ -104,7 +109,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                 <?php endif; ?>
             </div>
 
-            <?php if ($userRole === 'student' && !empty($offers)): ?>
+            <?php if ($canEvaluateCompanies && !empty($offers)): ?>
                 <div class="eval-form">
                     <h3>Ajouter une évaluation</h3>
                     <form method="post" action="companies.php?action=evaluate">

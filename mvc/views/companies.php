@@ -1,5 +1,9 @@
 <?php if (!defined('VIEW_INCLUDED')) { define('VIEW_INCLUDED', true); }
-$userRole = $_SESSION['user']['role'] ?? 'public';
+$userRole = strtolower(trim((string) ($_SESSION['user']['role'] ?? 'public')));
+if ($userRole === 'recruiter') {
+    $userRole = 'pilote';
+}
+$canManageCompanies = in_array($userRole, ['pilote', 'admin'], true);
 // $companies and optionally $criteria passed from controller
 ?>
 <!doctype html>
@@ -383,7 +387,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                         
                         <div class="company-actions">
                             <a href="companies.php?action=view&id=<?php echo $c['id']; ?>" class="btn-view">Voir détails</a>
-                            <?php if (in_array($userRole, ['pilote','admin'], true)): ?>
+                            <?php if ($canManageCompanies): ?>
                                 <a href="companies.php?action=edit&id=<?php echo $c['id']; ?>" class="btn-edit">✎</a>
                                 <form style="display:inline; margin:0" method="post" action="companies.php?action=delete" onsubmit="return confirm('Supprimer cette entreprise ?');">
                                     <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
@@ -402,7 +406,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
             <?php endif; ?>
 
             <!-- Create Section -->
-            <?php if (in_array($userRole, ['pilote','admin'], true)): ?>
+            <?php if ($canManageCompanies): ?>
                 <div class="create-section">
                     <h3>➕ Créer une entreprise</h3>
                     <form method="post" action="companies.php?action=create">

@@ -169,8 +169,8 @@ class CompanyController {
 
     public function evaluate()
     {
-        // only students may evaluate
-        $this->requireRole(['student']);
+        // only pilote and admin may evaluate
+        $this->requireRole(['pilote', 'admin']);
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $companyId = intval($_POST['company_id'] ?? 0);

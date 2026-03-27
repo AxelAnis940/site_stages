@@ -191,7 +191,7 @@ class CompanyModel {
 
     public function getEvaluations($companyId)
     {
-        $stmt = $this->conn->prepare("SELECT e.rating, e.comment, e.created_at, u.name AS student_name
+        $stmt = $this->conn->prepare("SELECT e.rating, e.comment, e.created_at, u.name AS evaluator_name
                                        FROM company_evaluations e
                                        JOIN users u ON u.id = e.user_id
                                        WHERE e.company_id = ?
