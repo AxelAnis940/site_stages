@@ -102,6 +102,99 @@ class UserController {
         exit;
     }
 
+    public function edit()
+    {
+        $this->requireRole(['admin']);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $id = intval($_GET['id'] ?? 0);
+            $editingUser = $this->model->getById($id);
+
+            if (!$editingUser) {
+                $_SESSION['user_flash'] = ['type' => 'error', 'message' => 'Utilisateur introuvable.'];
+                header('Location: users.php');
+                exit;
+            }
+
+            $users = $this->model->getAll();
+            include __DIR__ . '/../views/users.php';
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id'] ?? 0);
+            $name = trim($_POST['name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $role = $_POST['role'] ?? 'student';
+
+            if ($id && $name && $email && $role) {
+                $result = $this->model->update($id, $name, $email, $password, $role);
+
+                if (!empty($result['success'])) {
+                    if (!empty($_SESSION['user']['id']) && intval($_SESSION['user']['id']) === $id && !empty($result['row'])) {
+                        $_SESSION['user'] = array_merge($_SESSION['user'], $result['row']);
+                        $this->syncSessionRole();
+                    }
+
+                    $_SESSION['user_flash'] = ['type' => 'success', 'message' => 'Utilisateur modifie avec succes.'];
+
+                    if (!empty($_SESSION['user']['id']) && intval($_SESSION['user']['id']) === $id) {
+                        $updatedRole = $this->normalizeRole($_SESSION['user']['role'] ?? '');
+                        if ($updatedRole !== 'admin') {
+                            header('Location: index.html');
+                            exit;
+                        }
+                    }
+
+                    header('Location: users.php');
+                    exit;
+                }
+
+                $_SESSION['user_flash'] = ['type' => 'error', 'message' => 'Modification impossible: ' . ($result['error'] ?? 'Erreur inconnue')];
+                header('Location: users.php?action=edit&id=' . urlencode((string) $id));
+                exit;
+            }
+
+            $_SESSION['user_flash'] = ['type' => 'error', 'message' => 'Tous les champs sauf le mot de passe sont obligatoires.'];
+            header('Location: users.php?action=edit&id=' . urlencode((string) $id));
+            exit;
+        }
+
+        header('Location: users.php');
+        exit;
+    }
+
+    public function delete()
+    {
+        $this->requireRole(['admin']);
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id'] ?? 0);
+            $currentUserId = intval($_SESSION['user']['id'] ?? 0);
+
+            if (!$id) {
+                $_SESSION['user_flash'] = ['type' => 'error', 'message' => 'Utilisateur invalide.'];
+                header('Location: users.php');
+                exit;
+            }
+
+            if ($currentUserId && $currentUserId === $id) {
+                $_SESSION['user_flash'] = ['type' => 'error', 'message' => 'Vous ne pouvez pas supprimer votre propre compte.'];
+                header('Location: users.php');
+                exit;
+            }
+
+            $result = $this->model->delete($id);
+            $_SESSION['user_flash'] = !empty($result['success'])
+                ? ['type' => 'success', 'message' => 'Utilisateur supprime avec succes.']
+                : ['type' => 'error', 'message' => 'Suppression impossible: ' . ($result['error'] ?? 'Erreur inconnue')];
+        }
+
+        header('Location: users.php');
+        exit;
+    }
+
     public function login()
     {
         ini_set('display_errors', 1);

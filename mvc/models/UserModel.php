@@ -37,6 +37,33 @@ class UserModel {
         return $rows;
     }
 
+    public function getById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT id, name, email, role, created_at FROM users WHERE id = ? LIMIT 1");
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('i', $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result ? $result->fetch_assoc() : null;
+        $stmt->close();
+
+        return $user ? $this->normalizeUserRow($user) : null;
+    }
+
+    private function countAdmins()
+    {
+        $res = $this->conn->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'");
+        if (!$res) {
+            return 0;
+        }
+
+        $row = $res->fetch_assoc();
+        return (int) ($row['total'] ?? 0);
+    }
+
     public function create($name, $email, $password, $role = 'student')
     {
         $role = $this->normalizeRole($role);
@@ -69,6 +96,78 @@ class UserModel {
             $stmt->close();
             return ['success' => false, 'error' => $err, 'errno' => $errno, 'db' => DB_NAME, 'db_user' => DB_USER];
         }
+    }
+
+    public function update($id, $name, $email, $password, $role = 'student')
+    {
+        $role = $this->normalizeRole($role);
+        $existingUser = $this->getById($id);
+
+        if (!$existingUser) {
+            return ['success' => false, 'error' => 'Utilisateur introuvable'];
+        }
+
+        if (($existingUser['role'] ?? '') === 'admin' && $role !== 'admin' && $this->countAdmins() <= 1) {
+            return ['success' => false, 'error' => 'Impossible de modifier le dernier admin.'];
+        }
+
+        if ($password !== '') {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $this->conn->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = ? WHERE id = ?");
+            if (!$stmt) {
+                return ['success' => false, 'error' => $this->conn->error];
+            }
+            $stmt->bind_param('ssssi', $name, $email, $hash, $role, $id);
+        } else {
+            $stmt = $this->conn->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?");
+            if (!$stmt) {
+                return ['success' => false, 'error' => $this->conn->error];
+            }
+            $stmt->bind_param('sssi', $name, $email, $role, $id);
+        }
+
+        $ok = $stmt->execute();
+        if (!$ok) {
+            $err = $stmt->error;
+            $errno = $stmt->errno;
+            $stmt->close();
+            return ['success' => false, 'error' => $err, 'errno' => $errno];
+        }
+
+        $stmt->close();
+        $updatedUser = $this->getById($id);
+
+        return ['success' => true, 'row' => $updatedUser];
+    }
+
+    public function delete($id)
+    {
+        $existingUser = $this->getById($id);
+
+        if (!$existingUser) {
+            return ['success' => false, 'error' => 'Utilisateur introuvable'];
+        }
+
+        if (($existingUser['role'] ?? '') === 'admin' && $this->countAdmins() <= 1) {
+            return ['success' => false, 'error' => 'Impossible de supprimer le dernier admin.'];
+        }
+
+        $stmt = $this->conn->prepare("DELETE FROM users WHERE id = ?");
+        if (!$stmt) {
+            return ['success' => false, 'error' => $this->conn->error];
+        }
+
+        $stmt->bind_param('i', $id);
+        $ok = $stmt->execute();
+        if (!$ok) {
+            $err = $stmt->error;
+            $errno = $stmt->errno;
+            $stmt->close();
+            return ['success' => false, 'error' => $err, 'errno' => $errno];
+        }
+
+        $stmt->close();
+        return ['success' => true];
     }
 
     public function login($email, $password, $role)
