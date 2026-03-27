@@ -961,11 +961,11 @@ body {
     display: block;
 }
 
-.protected-recruiter {
+.protected-pilote {
     display: none;
 }
 
-.protected-recruiter.visible {
+.protected-pilote.visible {
     display: block;
 }
 

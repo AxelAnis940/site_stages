@@ -9,6 +9,8 @@ if ($action === 'create') {
     $controller->create();
 } elseif ($action === 'login') {
     $controller->login();
+} elseif ($action === 'logout') {
+    $controller->logout();
 } else {
     $controller->index();
 }

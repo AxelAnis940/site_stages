@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>InternHub - Find Your Dream Internship</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260320">
 </head>
 <body>
     <!-- HEADER -->
@@ -19,7 +22,7 @@
             <!-- Desktop Navigation -->
             <nav class="nav-desktop">
                 <a href="#">Browse</a>
-                <a href="/companies.php">Companies</a>
+                <a href="companies.php">Companies</a>
                 <a href="#">Resources</a>
                 <a href="#">Blog</a>
             </nav>
@@ -28,12 +31,13 @@
             <div class="cta-desktop">
                 <button id="signInBtnDesktop" class="btn btn-outline" onclick="openAuthModal('login')">Sign In</button>
                 <button id="logoutBtnDesktop" class="btn btn-outline" style="display: none;" onclick="logout()">Logout</button>
-                <button id="postJobBtnDesktop" class="btn btn-primary" style="display: none;" onclick="alert('Post Job - Recruiter feature')">Post Job</button>
+                <button id="postJobBtnDesktop" class="btn btn-primary" style="display: none;" onclick="alert('Post Job - Pilote feature')">Post Job</button>
                 <div id="userMenuDesktop" style="display: none; position: relative;">
                     <button class="btn btn-outline" onclick="toggleUserMenu()">
-                        <span id="userNameDisplay"></span> ▼
+                        <span id="userNameDisplay"></span> â–¼
                     </button>
                     <div id="userDropdown" class="user-dropdown" style="display: none;">
+                        <a href="users.php" class="protected-admin">Manage Users</a>
                         <a href="#" onclick="alert('Profile page'); return false;">Profile</a>
                         <a href="#" onclick="alert('Settings page'); return false;">Settings</a>
                         <hr>
@@ -43,18 +47,19 @@
             </div>
 
             <!-- Mobile Toggle -->
-            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+            <button class="menu-toggle" onclick="toggleMenu()">â˜°</button>
         </div>
 
         <!-- Mobile Navigation -->
         <div class="nav-mobile" id="mobileMenu">
             <a href="#">Browse</a>
-            <a href="/companies.php">Companies</a>
+            <a href="companies.php">Companies</a>
+            <a href="users.php" class="protected-admin">Manage Users</a>
             <a href="#">Resources</a>
             <a href="#">Blog</a>
 
             <div class="mobile-cta">
-                <a href="#" class="btn btn-outline">Sign In</a>
+                <a href="#" class="btn btn-outline" onclick="openAuthModal('login'); return false;">Sign In</a>
                 <a href="#" class="btn btn-primary">Post Job</a>
             </div>
         </div>
@@ -82,7 +87,7 @@
                         id="searchInput"
                         placeholder="Search internships, companies, or roles..."
                     />
-                    <span class="search-icon">🔍</span>
+                    <span class="search-icon">ðŸ”</span>
                 </div>
                 <button class="btn btn-search">Search</button>
             </div>
@@ -90,13 +95,13 @@
             <!-- CTA -->
             <div class="hero-cta">
                 <button class="btn btn-cta">
-                    🚀 Find Your Internship
+                    ðŸš€ Find Your Internship
                 </button>
             </div>
 
             <!-- Subtitle -->
             <p class="hero-subtitle">
-                ✨ Over 5,000+ opportunities waiting for you
+                âœ¨ Over 5,000+ opportunities waiting for you
             </p>
         </div>
     </section>
@@ -108,7 +113,7 @@
             <div class="filters">
                 <div class="filter" data-filter="type">
                     <button class="filter-btn" onclick="toggleDropdown('type')">
-                        Type <span>⌄</span>
+                        Type <span>âŒ„</span>
                     </button>
                     <div class="dropdown">
                         <label><input type="checkbox" value="Software Engineering"> Software Engineering</label>
@@ -121,7 +126,7 @@
 
                 <div class="filter" data-filter="location">
                     <button class="filter-btn" onclick="toggleDropdown('location')">
-                        Location <span>⌄</span>
+                        Location <span>âŒ„</span>
                     </button>
                     <div class="dropdown">
                         <label><input type="checkbox" value="Remote"> Remote</label>
@@ -134,7 +139,7 @@
 
                 <div class="filter" data-filter="duration">
                     <button class="filter-btn" onclick="toggleDropdown('duration')">
-                        Duration <span>⌄</span>
+                        Duration <span>âŒ„</span>
                     </button>
                     <div class="dropdown">
                         <label><input type="checkbox" value="3 months"> 3 months</label>
@@ -146,7 +151,7 @@
 
                 <div class="filter" data-filter="category">
                     <button class="filter-btn" onclick="toggleDropdown('category')">
-                        Category <span>⌄</span>
+                        Category <span>âŒ„</span>
                     </button>
                     <div class="dropdown">
                         <label><input type="checkbox" value="Startup"> Startup</label>
@@ -186,7 +191,7 @@
 
     <!-- FEATURED CARD (Single Card Example) -->
     <div class="internship-card featured" data-id="1" style="margin: 40px auto; max-width: 500px;">
-        <div class="badge">⭐ Featured</div>
+        <div class="badge">â­ Featured</div>
 
         <!-- Header -->
         <div class="card-header">
@@ -195,7 +200,7 @@
                 <h3 class="role">AI / ML Intern</h3>
             </div>
             <button class="favorite-btn" onclick="toggleFavorite(this)">
-                ❤️
+                â¤ï¸
             </button>
         </div>
 
@@ -206,15 +211,15 @@
 
         <!-- Details -->
         <div class="details">
-            <div><span>📍</span> San Francisco</div>
-            <div><span>💼</span> Full-time</div>
-            <div><span>⏱</span> 6 months</div>
+            <div><span>ðŸ“</span> San Francisco</div>
+            <div><span>ðŸ’¼</span> Full-time</div>
+            <div><span>â±</span> 6 months</div>
             <div class="salary">$25/hr</div>
         </div>
 
         <!-- Button -->
         <button class="apply-btn">
-            Apply Now →
+            Apply Now â†’
         </button>
 
         <!-- Glow -->
@@ -260,13 +265,13 @@
                     <h4 class="footer-title">Contact</h4>
                     <div class="footer-contact">
                         <div>
-                            📧 <a href="mailto:anis940@outlook.com">anis940@outlook.com</a>
+                            ðŸ“§ <a href="mailto:anis940@outlook.com">anis940@outlook.com</a>
                         </div>
                         <div>
-                            📞 <span>+1 (555) 123-4567</span>
+                            ðŸ“ž <span>+1 (555) 123-4567</span>
                         </div>
                         <div>
-                            📍 <span>Baraki</span>
+                            ðŸ“ <span>Baraki</span>
                         </div>
                     </div>
                 </div>
@@ -276,15 +281,15 @@
             <div class="footer-divider">
                 <!-- Social links -->
                 <div class="social-links">
-                    <a href="#" aria-label="GitHub">🐱</a>
-                    <a href="#" aria-label="LinkedIn">💼</a>
-                    <a href="#" aria-label="Twitter">🐦</a>
-                    <a href="#" aria-label="Email">✉️</a>
+                    <a href="#" aria-label="GitHub">ðŸ±</a>
+                    <a href="#" aria-label="LinkedIn">ðŸ’¼</a>
+                    <a href="#" aria-label="Twitter">ðŸ¦</a>
+                    <a href="#" aria-label="Email">âœ‰ï¸</a>
                 </div>
 
                 <!-- Bottom bar -->
                 <div class="footer-bottom">
-                    <p>© 2026 InternHub. All rights reserved.</p>
+                    <p>Â© 2026 InternHub. All rights reserved.</p>
                     <div class="legal-links">
                         <a href="#">Privacy Policy</a>
                         <a href="#">Terms of Service</a>
@@ -298,7 +303,7 @@
     <!-- AUTH MODAL -->
     <div id="authModal" class="auth-modal" style="display: none;">
         <div class="auth-modal-content">
-            <button class="auth-modal-close" onclick="closeAuthModal()">×</button>
+            <button class="auth-modal-close" onclick="closeAuthModal()">Ã—</button>
             
             <!-- Login Form -->
             <div id="loginForm" class="auth-form">
@@ -313,7 +318,7 @@
                     
                     <div class="form-group">
                         <label for="loginPassword">Password</label>
-                        <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        <input type="password" id="loginPassword" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required>
                     </div>
 
                     <div class="form-group">
@@ -321,7 +326,7 @@
                         <select id="loginRole" required>
                             <option value="">Select your role</option>
                             <option value="student">Student</option>
-                            <option value="recruiter">Recruiter</option>
+                            <option value="pilote">Pilote</option>
                             <option value="admin">Admin (for demo)</option>
                         </select>
                     </div>
@@ -329,43 +334,7 @@
                     <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Sign In</button>
                 </form>
                 
-                <p class="auth-toggle">Don't have an account? <a href="#" onclick="switchAuthForm('signup'); return false;">Sign Up</a></p>
-            </div>
-
-            <!-- Signup Form -->
-            <div id="signupForm" class="auth-form" style="display: none;">
-                <h2>Create Account</h2>
-                <p class="auth-subtitle">Join InternHub today</p>
-                
-                <form onsubmit="handleSignup(event)">
-                    <div class="form-group">
-                        <label for="signupName">Full Name</label>
-                        <input type="text" id="signupName" placeholder="John Doe" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="signupEmail">Email</label>
-                        <input type="email" id="signupEmail" placeholder="your@email.com" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="signupPassword">Password</label>
-                        <input type="password" id="signupPassword" placeholder="••••••••" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="signupRole">Role</label>
-                        <select id="signupRole" required>
-                            <option value="">Select your role</option>
-                            <option value="student">Student</option>
-                            <option value="recruiter">Recruiter</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Create Account</button>
-                </form>
-                
-                <p class="auth-toggle">Already have an account? <a href="#" onclick="switchAuthForm('login'); return false;">Sign In</a></p>
+                <p class="auth-toggle">Need an account? Please contact an administrator.</p>
             </div>
         </div>
     </div>
@@ -375,12 +344,12 @@
         <div class="test-creds-content">
             <h3>Test Credentials</h3>
             <p><strong>Student:</strong> student@example.com / password123</p>
-            <p><strong>Recruiter:</strong> recruiter@example.com / password123</p>
+            <p><strong>Pilote:</strong> pilote@example.com / password123</p>
             <p><strong>Admin:</strong> admin@example.com / password123</p>
             <button onclick="closeTestCredsModal()">Close</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=20260320"></script>
 </body>
 </html>

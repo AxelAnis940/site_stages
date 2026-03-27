@@ -4,6 +4,21 @@ require_once __DIR__ . '/../../config/db_config.php';
 class UserModel {
     private $conn;
 
+    private function normalizeRole($role)
+    {
+        $role = strtolower(trim((string) $role));
+        return $role === 'recruiter' ? 'pilote' : $role;
+    }
+
+    private function normalizeUserRow(array $user)
+    {
+        if (isset($user['role'])) {
+            $user['role'] = $this->normalizeRole($user['role']);
+        }
+
+        return $user;
+    }
+
     public function __construct()
     {
         $this->conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
@@ -17,13 +32,14 @@ class UserModel {
         $res = $this->conn->query("SELECT id, name, email, role, created_at FROM users ORDER BY id ASC");
         $rows = [];
         while ($r = $res->fetch_assoc()) {
-            $rows[] = $r;
+            $rows[] = $this->normalizeUserRow($r);
         }
         return $rows;
     }
 
     public function create($name, $email, $password, $role = 'student')
     {
+        $role = $this->normalizeRole($role);
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $this->conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
         if (!$stmt) {
@@ -41,6 +57,9 @@ class UserModel {
                 $res->execute();
                 $r = $res->get_result()->fetch_assoc();
                 $res->close();
+                if ($r) {
+                    $r = $this->normalizeUserRow($r);
+                }
                 return ['success' => true, 'id' => $id, 'row' => $r, 'db' => DB_NAME, 'db_user' => DB_USER];
             }
             return ['success' => true, 'id' => $id, 'db' => DB_NAME, 'db_user' => DB_USER];
@@ -54,11 +73,24 @@ class UserModel {
 
     public function login($email, $password, $role)
     {
-        $stmt = $this->conn->prepare("SELECT id, name, email, role, password FROM users WHERE email = ? AND role = ? LIMIT 1");
+        $role = $this->normalizeRole($role);
+
+        if ($role === 'pilote') {
+            $stmt = $this->conn->prepare("SELECT id, name, email, role, password FROM users WHERE email = ? AND role IN ('pilote', 'recruiter') LIMIT 1");
+        } else {
+            $stmt = $this->conn->prepare("SELECT id, name, email, role, password FROM users WHERE email = ? AND role = ? LIMIT 1");
+        }
+
         if (!$stmt) {
             return ['success' => false, 'error' => 'DB error'];
         }
-        $stmt->bind_param('ss', $email, $role);
+
+        if ($role === 'pilote') {
+            $stmt->bind_param('s', $email);
+        } else {
+            $stmt->bind_param('ss', $email, $role);
+        }
+
         $stmt->execute();
         $res = $stmt->get_result();
         $user = $res->fetch_assoc();
@@ -75,6 +107,7 @@ class UserModel {
 
         // Return user without password
         unset($user['password']);
+        $user = $this->normalizeUserRow($user);
         return ['success' => true, 'user' => $user];
     }
 }

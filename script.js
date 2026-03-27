@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // AUTHENTICATION & PERMISSIONS SYSTEM
 // ============================================
 
@@ -18,7 +18,7 @@ const permissionsMatrix = {
         viewApplications: true,
         editProfile: true,
     },
-    recruiter: {
+    pilote: {
         browse: true,
         viewInternships: true,
         search: true,
@@ -55,10 +55,10 @@ const users = [
     },
     {
         id: '2',
-        name: 'Jane Recruiter',
-        email: 'recruiter@example.com',
+        name: 'Jane Pilote',
+        email: 'pilote@example.com',
         password: 'password123',
-        role: 'recruiter',
+        role: 'pilote',
     },
     {
         id: '3',
@@ -72,6 +72,50 @@ const users = [
 // Current User State
 let currentUser = null;
 
+function normalizeRole(role) {
+    const normalizedRole = typeof role === 'string' ? role.trim().toLowerCase() : role;
+    return normalizedRole === 'recruiter' ? 'pilote' : normalizedRole;
+}
+
+function syncCurrentUserRole() {
+    if (!currentUser) {
+        return 'public';
+    }
+
+    const normalizedRole = normalizeRole(currentUser.role);
+    if (normalizedRole !== currentUser.role) {
+        currentUser.role = normalizedRole;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    return normalizedRole;
+}
+
+function getSuggestedAppUrls() {
+    const urls = [
+        'http://localhost/index.html?v=20260320',
+        'http://localhost/dev_web/index.html?v=20260320',
+    ];
+
+    return urls.join('\n');
+}
+
+function ensurePhpServerAvailable() {
+    if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        return true;
+    }
+
+    alert(
+        'Cette page est ouverte hors serveur PHP.\n\n' +
+        'Ouvre le projet depuis XAMPP/Apache avec une URL comme :\n' +
+        getSuggestedAppUrls() +
+        '\n\n' +
+        'Si besoin, lance aussi setup_db.php depuis le navigateur.'
+    );
+
+    return false;
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Load user from localStorage
@@ -79,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedUser) {
         try {
             currentUser = JSON.parse(savedUser);
+            syncCurrentUserRole();
             updateUIForLoggedInUser();
         } catch (e) {
             console.error('Error loading saved user:', e);
@@ -91,11 +136,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // AUTH MODAL MANAGEMENT
 // ============================================
 
-function openAuthModal(formType = 'login') {
+function openAuthModal() {
     const modal = document.getElementById('authModal');
     if (modal) {
         modal.style.display = 'flex';
-        switchAuthForm(formType);
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.style.display = 'block';
+        }
     }
 }
 
@@ -103,19 +151,6 @@ function closeAuthModal() {
     const modal = document.getElementById('authModal');
     if (modal) {
         modal.style.display = 'none';
-    }
-}
-
-function switchAuthForm(formType) {
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    
-    if (formType === 'login') {
-        if (loginForm) loginForm.style.display = 'block';
-        if (signupForm) signupForm.style.display = 'none';
-    } else {
-        if (loginForm) loginForm.style.display = 'none';
-        if (signupForm) signupForm.style.display = 'block';
     }
 }
 
@@ -128,11 +163,15 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================
-// LOGIN & SIGNUP HANDLERS
+// LOGIN HANDLERS
 // ============================================
 
 function handleLogin(event) {
     event.preventDefault();
+
+    if (!ensurePhpServerAvailable()) {
+        return;
+    }
 
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -173,97 +212,47 @@ function handleLogin(event) {
                   id: data.user.id,
                   name: data.user.name,
                   email: data.user.email,
-                  role: data.user.role,
+                  role: normalizeRole(data.user.role),
                   loginTime: new Date().toISOString(),
               };
               localStorage.setItem('currentUser', JSON.stringify(currentUser));
               document.querySelector('#loginForm form').reset();
               closeAuthModal();
               updateUIForLoggedInUser();
-              alert('Connexion réussie!');
+              alert('Connexion rÃ©ussie!');
           } else {
               alert('Erreur: ' + (data.error || 'Impossible de se connecter'));
           }
       }).catch(err => {
           console.error('Login error:', err);
-          alert('Erreur réseau ou serveur lors de la connexion. Détails: ' + err.message);
+          alert('Erreur rÃ©seau ou serveur lors de la connexion. DÃ©tails: ' + err.message);
       });
 }
 
-function handleSignup(event) {
-    event.preventDefault();
-
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const role = document.getElementById('signupRole').value || 'student';
-
-    if (!name || !email || !password) {
-        alert('Veuillez remplir tous les champs.');
-        return;
+async function logout() {
+    if (ensurePhpServerAvailable()) {
+        const targetUrl = new URL('users.php?action=logout', window.location.href).toString();
+        try {
+            await fetch(targetUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
     }
 
-    // Send signup data to server to persist in MySQL
-    const fd = new FormData();
-    fd.append('name', name);
-    fd.append('email', email);
-    fd.append('password', password);
-    fd.append('role', role);
-
-    // Use a fully-resolved URL (safer if the page is served from a subpath)
-    const targetUrl = new URL('users.php?action=create', window.location.href).toString();
-
-    fetch(targetUrl, {
-        method: 'POST',
-        body: fd,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    }).then(res => {
-        if (!res.ok) return res.text().then(t => Promise.reject(new Error('HTTP ' + res.status + ': ' + t)));
-        const ct = res.headers.get('content-type') || '';
-        if (ct.indexOf('application/json') === -1) {
-            return res.text().then(t => Promise.reject(new Error('Server error: ' + t)));
-        }
-        return res.json();
-    })
-      .then(data => {
-          console.log('Signup response:', data);
-          if (data.success) {
-              currentUser = {
-                  id: data.id || null,
-                  name: name,
-                  email: email,
-                  role: role,
-                  loginTime: new Date().toISOString(),
-              };
-              localStorage.setItem('currentUser', JSON.stringify(currentUser));
-              document.querySelector('#signupForm form').reset();
-              closeAuthModal();
-              updateUIForLoggedInUser();
-              alert('Inscription réussie. Utilisateur ajouté en base.');
-          } else {
-              alert('Erreur: ' + (data.error || 'Impossible de créer l\'utilisateur'));
-          }
-      }).catch(err => {
-          console.error('Signup fetch error:', err);
-          // Try to fetch debug endpoint to help diagnose server availability
-          const debugUrl = new URL('debug_db.php', window.location.href).toString();
-          fetch(debugUrl).then(r => r.text()).then(text => {
-              console.error('debug_db response:', text);
-              alert('Erreur réseau ou serveur lors de l\'inscription. Détails: ' + err.message + '\n\ndebug_db.php response (voir console pour plus):\n' + text.substring(0, 1000));
-          }).catch(e2 => {
-              console.error('Failed to fetch debug_db.php:', e2);
-              alert('Erreur réseau ou serveur lors de l\'inscription. Détails: ' + err.message + '\nImpossible d\'atteindre debug_db.php: ' + e2.message);
-          });
-      });
-}
-
-function logout() {
     currentUser = null;
     localStorage.removeItem('currentUser');
     updateUIForLoggedOutUser();
     closeAuthModal();
+    const dropdown = document.getElementById('userDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
     console.log('User logged out');
 }
 
@@ -272,6 +261,8 @@ function logout() {
 // ============================================
 
 function updateUIForLoggedInUser() {
+    syncCurrentUserRole();
+
     // Hide sign in button, show logout and user menu
     const signInBtnDesktop = document.getElementById('signInBtnDesktop');
     const logoutBtnDesktop = document.getElementById('logoutBtnDesktop');
@@ -287,7 +278,7 @@ function updateUIForLoggedInUser() {
         }
     }
     
-    // Show Post Job button for recruiters
+    // Show Post Job button for pilotes
     if (postJobBtnDesktop) {
         if (hasPermission('postJob')) {
             postJobBtnDesktop.style.display = 'block';
@@ -341,7 +332,8 @@ function hasPermission(action) {
     if (!currentUser) {
         return permissionsMatrix.public[action] || false;
     }
-    return permissionsMatrix[currentUser.role][action] || false;
+    const currentRole = syncCurrentUserRole();
+    return permissionsMatrix[currentRole]?.[action] || false;
 }
 
 function checkPermission(action) {
@@ -353,20 +345,22 @@ function checkPermission(action) {
 }
 
 function updateProtectedContent() {
+    const currentRole = syncCurrentUserRole();
+
     // Update student-only content
     const studentContent = document.querySelectorAll('.protected-student');
     studentContent.forEach(el => {
-        if (currentUser && currentUser.role === 'student') {
+        if (currentUser && currentRole === 'student') {
             el.classList.add('visible');
         } else {
             el.classList.remove('visible');
         }
     });
     
-    // Update recruiter-only content
-    const recruiterContent = document.querySelectorAll('.protected-recruiter');
-    recruiterContent.forEach(el => {
-        if (currentUser && currentUser.role === 'recruiter') {
+    // Update pilote-only content
+    const piloteContent = document.querySelectorAll('.protected-pilote');
+    piloteContent.forEach(el => {
+        if (currentUser && currentRole === 'pilote') {
             el.classList.add('visible');
         } else {
             el.classList.remove('visible');
@@ -376,7 +370,7 @@ function updateProtectedContent() {
     // Update admin-only content
     const adminContent = document.querySelectorAll('.protected-admin');
     adminContent.forEach(el => {
-        if (currentUser && currentUser.role === 'admin') {
+        if (currentUser && currentRole === 'admin') {
             el.classList.add('visible');
         } else {
             el.classList.remove('visible');
@@ -437,7 +431,7 @@ function toggleFavorite(btn) {
         return;
     }
     btn.classList.toggle("active");
-    btn.textContent = btn.classList.contains("active") ? "❤️" : "🤍";
+    btn.textContent = btn.classList.contains("active") ? "â¤ï¸" : "ðŸ¤";
 }
 
 // ============================================
@@ -501,7 +495,7 @@ function renderActiveFilters() {
         values.forEach(value => {
             const tag = document.createElement('div');
             tag.className = 'filter-tag';
-            tag.innerHTML = `${value} <button onclick="removeFilter('${cat}','${value}')">×</button>`;
+            tag.innerHTML = `${value} <button onclick="removeFilter('${cat}','${value}')">Ã—</button>`;
             fragment.appendChild(tag);
         });
     });

@@ -14,11 +14,11 @@ The following capabilities have been implemented as of February 2026:
    - Detail page shows associated offers and evaluations.
 
 2. **Créer une entreprise** (SFx3)
-   - Only `recruiter` and `admin` roles may create.
+   - Only `pilote` and `admin` roles may create.
    - Data fields: name, description, contact email, phone.
 
 3. **Modifier une entreprise** (SFx4)
-   - Only `recruiter` and `admin` roles may edit.
+   - Only `pilote` and `admin` roles may edit.
    - Editing UI available from list or detail view.
 
 4. **Évaluer une entreprise** (SFx5)
@@ -26,7 +26,7 @@ The following capabilities have been implemented as of February 2026:
    - Ratings stored with optional comment; average displayed.
 
 5. **Supprimer une entreprise** (SFx6)
-   - Only `recruiter` and `admin` roles may delete.
+   - Only `pilote` and `admin` roles may delete.
    - Deletion cascades to offers, applications, evaluations.
 
 ## Data Model Additions
@@ -46,7 +46,7 @@ Sample data is inserted for demonstration.
 2. Use `companies.php` to view/search companies.
 3. Log in using the demo credentials (see users table or `script.js`):
    - student@example.com / password123 (student)
-   - recruiter@example.com / password123 (recruiter)
+   - pilote@example.com / password123 (pilote)
    - admin@example.com / password123 (admin)
 4. Perform create/edit/delete operations depending on your role.
 5. On a company detail page you can add an evaluation (students only).

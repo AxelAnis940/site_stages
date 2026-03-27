@@ -8,7 +8,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entreprises - InternHub</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="styles.css">
     <style>
         .companies-section {
             min-height: 100vh;
@@ -303,12 +303,12 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                 <span class="logo-text">InternHub</span>
             </div>
             <nav class="nav-desktop">
-                <a href="/">Browse</a>
-                <a href="/companies.php">Companies</a>
+                <a href="index.html">Browse</a>
+                <a href="companies.php">Companies</a>
                 <a href="#">Resources</a>
             </nav>
             <div class="cta-desktop">
-                <a href="/" class="btn btn-outline">← Retour</a>
+                <a href="index.html" class="btn btn-outline">← Retour</a>
             </div>
         </div>
     </header>
@@ -383,7 +383,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
                         
                         <div class="company-actions">
                             <a href="companies.php?action=view&id=<?php echo $c['id']; ?>" class="btn-view">Voir détails</a>
-                            <?php if (in_array($userRole, ['recruiter','admin'], true)): ?>
+                            <?php if (in_array($userRole, ['pilote','admin'], true)): ?>
                                 <a href="companies.php?action=edit&id=<?php echo $c['id']; ?>" class="btn-edit">✎</a>
                                 <form style="display:inline; margin:0" method="post" action="companies.php?action=delete" onsubmit="return confirm('Supprimer cette entreprise ?');">
                                     <input type="hidden" name="id" value="<?php echo $c['id']; ?>">
@@ -402,7 +402,7 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
             <?php endif; ?>
 
             <!-- Create Section -->
-            <?php if (in_array($userRole, ['recruiter','admin'], true)): ?>
+            <?php if (in_array($userRole, ['pilote','admin'], true)): ?>
                 <div class="create-section">
                     <h3>➕ Créer une entreprise</h3>
                     <form method="post" action="companies.php?action=create">
@@ -429,6 +429,6 @@ $userRole = $_SESSION['user']['role'] ?? 'public';
         </div>
     </section>
 
-    <script src="/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

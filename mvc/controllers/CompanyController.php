@@ -4,22 +4,42 @@ require_once __DIR__ . '/../models/CompanyModel.php';
 class CompanyController {
     private $model;
 
+    private function normalizeRole($role)
+    {
+        $role = strtolower(trim((string) $role));
+        return $role === 'recruiter' ? 'pilote' : $role;
+    }
+
+    private function syncSessionRole()
+    {
+        if (!empty($_SESSION['user']['role'])) {
+            $_SESSION['user']['role'] = $this->normalizeRole($_SESSION['user']['role']);
+        }
+    }
+
     public function __construct()
     {
         $this->model = new CompanyModel();
         session_start();
+        $this->syncSessionRole();
     }
 
     /**
      * Simple role check helper. Accepts array of allowed roles.
-     * Sends 403 and exits if current session user doesn't have one of the roles.
+     * Sends 403 and exits if current session user does not have one of the roles.
      */
     private function requireRole(array $roles)
     {
         $user = $_SESSION['user'] ?? null;
-        if (!$user || !in_array($user['role'], $roles, true)) {
+        $currentRole = $this->normalizeRole($user['role'] ?? '');
+
+        if ($user) {
+            $_SESSION['user']['role'] = $currentRole;
+        }
+
+        if (!$user || !in_array($currentRole, $roles, true)) {
             header('HTTP/1.0 403 Forbidden');
-            echo 'Accès refusé';
+            echo 'Acces refuse';
             exit;
         }
     }
@@ -28,7 +48,7 @@ class CompanyController {
     {
         // search criteria come from GET parameters
         $criteria = [];
-        foreach (['name','email','phone','description'] as $field) {
+        foreach (['name', 'email', 'phone', 'description'] as $field) {
             if (!empty($_GET[$field])) {
                 $criteria[$field] = trim($_GET[$field]);
             }
@@ -53,8 +73,8 @@ class CompanyController {
 
     public function create()
     {
-        // only recruiter and admin may create
-        $this->requireRole(['recruiter','admin']);
+        // only pilote and admin may create
+        $this->requireRole(['pilote', 'admin']);
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = trim($_POST['name'] ?? '');
@@ -81,8 +101,8 @@ class CompanyController {
 
     public function edit()
     {
-        // only recruiter and admin may edit
-        $this->requireRole(['recruiter','admin']);
+        // only pilote and admin may edit
+        $this->requireRole(['pilote', 'admin']);
         // GET -> display form
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $id = intval($_GET['id'] ?? 0);
@@ -124,8 +144,8 @@ class CompanyController {
 
     public function delete()
     {
-        // only recruiter and admin may delete
-        $this->requireRole(['recruiter','admin']);
+        // only pilote and admin may delete
+        $this->requireRole(['pilote', 'admin']);
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id'] ?? 0);
@@ -154,16 +174,23 @@ class CompanyController {
         $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $companyId = intval($_POST['company_id'] ?? 0);
-            $userId = intval($_POST['user_id'] ?? 0);
+            // use logged-in user id
+            $userId = $_SESSION['user']['id'] ?? 0;
             $rating = intval($_POST['rating'] ?? 0);
             $comment = trim($_POST['comment'] ?? '');
-            if ($companyId && $userId && $rating > 0) {
+            // ensure company actually has at least one offer
+            $offers = $this->model->getOffers($companyId);
+            if (!$companyId || empty($offers)) {
+                $result = ['success' => false, 'error' => 'Entreprise sans offre ne peut pas etre evaluee'];
+            } elseif ($userId && $rating > 0) {
                 $result = $this->model->addEvaluation($companyId, $userId, $rating, $comment);
-                if ($isAjax) {
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
-                    return;
-                }
+            } else {
+                $result = ['success' => false, 'error' => 'Donnees manquantes'];
+            }
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode($result);
+                return;
             }
         }
         if ($isAjax) {
@@ -171,7 +198,9 @@ class CompanyController {
             echo json_encode(['success' => false, 'error' => 'Invalid request']);
             return;
         }
-        header('Location: companies.php');
+        // non-ajax redirect back to detail
+        $redir = 'companies.php?action=view&id=' . urlencode($companyId);
+        header('Location: ' . $redir);
         exit;
     }
 }

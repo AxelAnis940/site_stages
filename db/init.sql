@@ -7,9 +7,16 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  role ENUM('student','recruiter','admin','public') DEFAULT 'public',
+  role ENUM('student','pilote','admin','public') DEFAULT 'public',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE users
+  MODIFY role ENUM('student','pilote','admin','public') DEFAULT 'public';
+
+UPDATE users
+SET role = 'pilote'
+WHERE role IN ('recruiter', '');
 
 -- Sample application users (passwords are hashed with PASSWORD_DEFAULT / bcrypt)
 SET FOREIGN_KEY_CHECKS=0;
@@ -19,7 +26,7 @@ DELETE FROM users WHERE id IN (1, 2, 3);
 SET FOREIGN_KEY_CHECKS=1;
 INSERT INTO users (id, name, email, password, role) VALUES
 (1, 'John Student','student@example.com','$2y$10$f3M4hC0XvtN2xJmj7LdZVeLKVF4JJ/2To6Vgj/QoF.70.MAyDNDze','student'),
-(2, 'Jane Recruiter','recruiter@example.com','$2y$10$f3M4hC0XvtN2xJmj7LdZVeLKVF4JJ/2To6Vgj/QoF.70.MAyDNDze','recruiter'),
+(2, 'Jane Pilote','pilote@example.com','$2y$10$f3M4hC0XvtN2xJmj7LdZVeLKVF4JJ/2To6Vgj/QoF.70.MAyDNDze','pilote'),
 (3, 'Admin User','admin@example.com','$2y$10$f3M4hC0XvtN2xJmj7LdZVeLKVF4JJ/2To6Vgj/QoF.70.MAyDNDze','admin')
 ON DUPLICATE KEY UPDATE password=VALUES(password);
 
@@ -78,11 +85,11 @@ CREATE TABLE IF NOT EXISTS company_evaluations (
 
 -- Create MySQL accounts for demo (run as root). Adjust passwords in production.
 CREATE USER IF NOT EXISTS 'student'@'localhost' IDENTIFIED BY 'password123';
-CREATE USER IF NOT EXISTS 'recruiter'@'localhost' IDENTIFIED BY 'password123';
+CREATE USER IF NOT EXISTS 'pilote'@'localhost' IDENTIFIED BY 'password123';
 CREATE USER IF NOT EXISTS 'admin'@'localhost' IDENTIFIED BY 'password123';
 
 GRANT SELECT, INSERT ON internships_app.* TO 'student'@'localhost';
-GRANT ALL PRIVILEGES ON internships_app.* TO 'recruiter'@'localhost';
+GRANT ALL PRIVILEGES ON internships_app.* TO 'pilote'@'localhost';
 GRANT ALL PRIVILEGES ON internships_app.* TO 'admin'@'localhost';
 
 FLUSH PRIVILEGES;
