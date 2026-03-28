@@ -283,7 +283,7 @@ $companyName = trim((string) ($company['name'] ?? ''));
             </div>
 
             <nav class="nav-desktop">
-                <a href="index.html">Browse</a>
+                <a href="offers.php">Offers</a>
                 <a href="companies.php">Companies</a>
                 <a href="#">Resources</a>
                 <a href="#">Blog</a>
@@ -298,7 +298,7 @@ $companyName = trim((string) ($company['name'] ?? ''));
         </div>
 
         <div class="nav-mobile" id="mobileMenu">
-            <a href="index.html">Browse</a>
+            <a href="offers.php">Offers</a>
             <a href="companies.php">Companies</a>
             <a href="#">Resources</a>
             <a href="#">Blog</a>

@@ -307,7 +307,7 @@ $canManageCompanies = in_array($userRole, ['pilote', 'admin'], true);
                 <span class="logo-text">InternHub</span>
             </div>
             <nav class="nav-desktop">
-                <a href="index.html">Browse</a>
+                <a href="offers.php">Offers</a>
                 <a href="companies.php">Companies</a>
                 <a href="#">Resources</a>
             </nav>

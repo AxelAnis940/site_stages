@@ -476,7 +476,7 @@ $activeRoleCount = count(array_filter($roleCounts, static function ($count) {
             </div>
 
             <nav class="nav-desktop">
-                <a href="index.html">Browse</a>
+                <a href="offers.php">Offers</a>
                 <a href="companies.php">Companies</a>
                 <a href="users.php">Manage Users</a>
                 <a href="#">Resources</a>
@@ -491,7 +491,7 @@ $activeRoleCount = count(array_filter($roleCounts, static function ($count) {
         </div>
 
         <div class="nav-mobile" id="mobileMenu">
-            <a href="index.html">Browse</a>
+            <a href="offers.php">Offers</a>
             <a href="companies.php">Companies</a>
             <a href="users.php">Manage Users</a>
             <a href="#">Resources</a>

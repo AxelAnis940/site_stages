@@ -24,8 +24,13 @@ $canEvaluateCompanies = in_array($userRole, ['pilote', 'admin'], true);
         .info-block { background: rgba(255,255,255,0.03); border:1px solid rgba(34,211,238,0.2); border-radius:16px; padding:30px; max-width:800px; margin:20px auto; }
         .info-block p { margin-bottom:12px; }
         .offers-list, .evals-list { max-width:800px; margin:20px auto; }
+        .offers-header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; }
         .offers-list ul { list-style:none; padding-left:0; }
         .offers-list li { background: rgba(255,255,255,0.03); border:1px solid rgba(34,211,238,0.2); border-radius:8px; padding:12px 16px; margin-bottom:10px; }
+        .offer-link { color:#67e8f9; text-decoration:none; }
+        .offer-link:hover { color:#f9a8d4; }
+        .offer-inline-actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+        .offer-inline-actions a, .offer-inline-actions button { text-decoration:none; }
         .evals-table { width:100%; max-width:800px; margin:20px auto; border-collapse:collapse; }
         .evals-table th, .evals-table td { padding:12px; border:1px solid rgba(34,211,238,0.2); }
         .evals-table th { background:rgba(34,211,238,0.05); }
@@ -33,6 +38,8 @@ $canEvaluateCompanies = in_array($userRole, ['pilote', 'admin'], true);
         .eval-form label { display:block; margin-bottom:6px; color:#d1d5db; }
         .eval-form input, .eval-form select, .eval-form textarea { width:100%; padding:10px; margin-bottom:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(34,211,238,0.2); border-radius:8px; color:#e5e7eb; }
         .eval-form button { width:100%; background:linear-gradient(90deg,#ec4899,#ef4444); }
+        .btn-delete { padding:10px 14px; background:rgba(239,68,68,0.18); border:1px solid rgba(239,68,68,0.35); color:#fca5a5; border-radius:10px; cursor:pointer; font-weight:700; }
+        .btn-delete:hover { background:rgba(239,68,68,0.28); }
         .back-link { text-align:center; margin-top:50px; }
     </style>
 </head>
@@ -44,7 +51,7 @@ $canEvaluateCompanies = in_array($userRole, ['pilote', 'admin'], true);
                 <span class="logo-text">InternHub</span>
             </div>
             <nav class="nav-desktop">
-                <a href="index.html">Browse</a>
+                <a href="offers.php">Offers</a>
                 <a href="companies.php">Companies</a>
                 <a href="#">Resources</a>
             </nav>
@@ -76,11 +83,29 @@ $canEvaluateCompanies = in_array($userRole, ['pilote', 'admin'], true);
             </div>
 
             <div class="offers-list">
-                <h2>Offres</h2>
+                <div class="offers-header">
+                    <h2>Offres</h2>
+                    <?php if ($canManageCompanies): ?>
+                        <a href="offers.php?action=create&company_id=<?php echo $company['id']; ?>" class="btn btn-primary">Nouvelle offre</a>
+                    <?php endif; ?>
+                </div>
                 <?php if (!empty($offers)): ?>
                     <ul>
                         <?php foreach ($offers as $o): ?>
-                            <li><strong><?php echo htmlspecialchars($o['title']); ?></strong><br><?php echo nl2br(htmlspecialchars($o['description'])); ?></li>
+                            <li>
+                                <strong><a class="offer-link" href="offers.php?action=view&id=<?php echo $o['id']; ?>"><?php echo htmlspecialchars($o['title']); ?></a></strong><br>
+                                <?php echo nl2br(htmlspecialchars($o['description'])); ?>
+                                <?php if ($canManageCompanies): ?>
+                                    <div class="offer-inline-actions">
+                                        <a href="offers.php?action=edit&id=<?php echo $o['id']; ?>" class="btn btn-outline">Modifier</a>
+                                        <form style="display:inline; margin:0" method="post" action="offers.php?action=delete" onsubmit="return confirm('Supprimer cette offre ?');">
+                                            <input type="hidden" name="id" value="<?php echo $o['id']; ?>">
+                                            <input type="hidden" name="redirect_to" value="companies.php?action=view&id=<?php echo $company['id']; ?>">
+                                            <button type="submit" class="btn-delete">Suppr.</button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
+                            </li>
                         <?php endforeach; ?>
                     </ul>
                 <?php else: ?>
